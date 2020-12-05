@@ -22,6 +22,7 @@ namespace GursaanjTools
         private const string m_genericGameName = "Game";
         private const string m_guiTextFieldName = "GameNameTextField";
         private const string m_sceneNameExtension = ".unity";
+        private const string m_sceneDirectoryName = "Scenes";
 
         private const string m_directoryCreationString = "{0}/{1}";
         private const string m_sceneCreationString = "{0}_{1}";
@@ -121,82 +122,56 @@ namespace GursaanjTools
             DirectoryInfo rootInfo = null;
             string newRootPath = string.Empty;
             List<String> folderNames = new List<string>();
-            
-            //For Art
-            newRootPath = string.Format(m_directoryCreationString, rootPath, "Art");
 
-            rootInfo = Directory.CreateDirectory(newRootPath);
+            SortedList<string, List<string>> directories = ProjectSetupData.GetProjectStructure();
 
-            if (rootInfo.Exists)
+            if (string.IsNullOrEmpty(rootPath) || directories == null)
             {
-                folderNames.Clear();
-                folderNames.Add("Animation");
-                folderNames.Add("Objects");
-                folderNames.Add("Materials");
-                folderNames.Add("Shaders");
-                folderNames.Add("Fonts");
-                
-                CreateFolders(newRootPath, folderNames);
+                return;
             }
-            
-            //For Scripts
-            newRootPath = string.Format(m_directoryCreationString, rootPath, "Scripts");
 
-            rootInfo = Directory.CreateDirectory(newRootPath);
-
-            if (rootInfo.Exists)
+            foreach (string directory in directories.Keys)
             {
-                folderNames.Clear();
-                folderNames.Add("Editor");
-                folderNames.Add("Managers");
-                folderNames.Add("Shaders");
-                folderNames.Add("UI");
-                folderNames.Add("Misc");
-                
-                CreateFolders(newRootPath, folderNames);
-            }
-            
-            //For Audio
-            newRootPath = string.Format(m_directoryCreationString, rootPath, "Audio");
+                if (string.IsNullOrEmpty(directory))
+                {
+                    continue;
+                }
 
-            rootInfo = Directory.CreateDirectory(newRootPath);
+                newRootPath = string.Format(m_directoryCreationString, rootPath, directory);
+                rootInfo = Directory.CreateDirectory(newRootPath);
 
-            if (rootInfo.Exists)
-            {
-                folderNames.Clear();
-                folderNames.Add("Sound Effects");
-                folderNames.Add("Background Music");
-                folderNames.Add("UI");
+                List<string> subDirectories = directories[directory];
 
-                CreateFolders(newRootPath, folderNames);
-            }
-            
-            //For Prefabs
-            newRootPath = string.Format(m_directoryCreationString, rootPath, "Prefabs");
+                if (rootInfo.Exists && subDirectories != null)
+                {
+                    folderNames.Clear();
+                    
+                    foreach (string subDirectory in subDirectories)
+                    {
+                        if (string.IsNullOrEmpty(subDirectory))
+                        {
+                            continue;
+                        }
+                        
+                        folderNames.Add(subDirectory);
+                    }
+                    
+                    CreateFolders(newRootPath, folderNames);
+                    
+                    //Special case for Scenes Folder : Add Scenes
+                    if (string.Equals(directory, ProjectSetupData.GetSceneDirectory()))
+                    {
+                        List<string> sceneNames = ProjectSetupData.GetSceneNames();
 
-            rootInfo = Directory.CreateDirectory(newRootPath);
-
-            if (rootInfo.Exists)
-            {
-                folderNames.Clear();
-                folderNames.Add("Characters");
-                folderNames.Add("Environment");
-                folderNames.Add("Props");
-                folderNames.Add("UI");
-                folderNames.Add("Misc");
-                
-                CreateFolders(newRootPath, folderNames);
-            }
-            
-            //Create Scenes
-            newRootPath = string.Format(m_directoryCreationString, rootPath, "Scenes");
-            rootInfo = Directory.CreateDirectory(newRootPath);
-
-            if (rootInfo.Exists)
-            {
-                CreateScene(newRootPath, string.Format(m_sceneCreationString, m_gameName, "StartScreen"));
-                CreateScene(newRootPath,string.Format(m_sceneCreationString, m_gameName, "SandBox"));
-                CreateScene(newRootPath,string.Format(m_sceneCreationString, m_gameName, "Loading"));
+                        if (sceneNames != null)
+                        {
+                            foreach (string sceneName in sceneNames)
+                            {
+                                CreateScene(newRootPath, string.Format(m_sceneCreationString, m_gameName, sceneName));
+                            }
+                        }
+                    }
+                }
             }
         }
 
