@@ -1,6 +1,8 @@
 ﻿using System;
-using UnityEditor;
 using UnityEngine;
+using UnityEditor;
+using UnityEngine.SceneManagement;
+using UnityEditor.SceneManagement;
 using System.Collections.Generic;
 using System.IO;
 
@@ -19,8 +21,10 @@ namespace GursaanjTools
         private const string m_buttonLabel = "Create Project Structure";
         private const string m_genericGameName = "Game";
         private const string m_guiTextFieldName = "GameNameTextField";
+        private const string m_sceneNameExtension = ".unity";
 
         private const string m_directoryCreationString = "{0}/{1}";
+        private const string m_sceneCreationString = "{0}_{1}";
         
         //Display Dialogue Strings
         private const string m_confirmationString = "Sounds good!";
@@ -183,11 +187,22 @@ namespace GursaanjTools
                 
                 CreateFolders(newRootPath, folderNames);
             }
+            
+            //Create Scenes
+            newRootPath = string.Format(m_directoryCreationString, rootPath, "Scenes");
+            rootInfo = Directory.CreateDirectory(newRootPath);
+
+            if (rootInfo.Exists)
+            {
+                CreateScene(newRootPath, string.Format(m_sceneCreationString, m_gameName, "StartScreen"));
+                CreateScene(newRootPath,string.Format(m_sceneCreationString, m_gameName, "SandBox"));
+                CreateScene(newRootPath,string.Format(m_sceneCreationString, m_gameName, "Loading"));
+            }
         }
 
         private void CreateFolders(string path, List<string> folders)
         {
-            if (folders == null || folders.Count == 0)
+            if (string.IsNullOrEmpty(path) || folders == null || folders.Count == 0)
             {
                 return;
             }
@@ -198,7 +213,18 @@ namespace GursaanjTools
             }
         }
 
+        private void CreateScene(string path, string sceneName)
+        {
+            if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(sceneName))
+            {
+                return;
+            }
 
+            Scene currentScene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            string fullSceneName = string.Format("{0}{1}", sceneName, m_sceneNameExtension);
+            EditorSceneManager.SaveScene(currentScene, String.Format(m_directoryCreationString, path, fullSceneName), true);
+        }
+        
         private void FocusOnTextField()
         {
             if (m_shouldFocusOnFirstTextElement && m_window != null)
