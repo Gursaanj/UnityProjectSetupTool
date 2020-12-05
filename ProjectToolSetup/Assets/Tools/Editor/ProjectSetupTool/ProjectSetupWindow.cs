@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEditor;
 using UnityEngine;
+using System.Collections.Generic;
 using System.IO;
 
 namespace GursaanjTools
@@ -18,6 +19,8 @@ namespace GursaanjTools
         private const string m_buttonLabel = "Create Project Structure";
         private const string m_genericGameName = "Game";
         private const string m_guiTextFieldName = "GameNameTextField";
+
+        private const string m_directoryCreationString = "{0}/{1}";
         
         //Display Dialogue Strings
         private const string m_confirmationString = "Sounds good!";
@@ -94,13 +97,107 @@ namespace GursaanjTools
                 }
             }
             
-            string rootPath = string.Format("{0}/{1}", Application.dataPath, m_gameName);
+            //Create Main Directory
+            string rootPath = string.Format(m_directoryCreationString, Application.dataPath, m_gameName);
+            DirectoryInfo rootInfo = Directory.CreateDirectory(rootPath);
+            if (!rootInfo.Exists)
+            {
+                return;
+            }
             
-            Directory.CreateDirectory(rootPath);
+            CreateSubFolders(rootPath);
+            
             AssetDatabase.Refresh();
-
             CloseWindow();
         }
+        
+        //Todo : Create static class for string
+        private void CreateSubFolders(string rootPath)
+        {
+            DirectoryInfo rootInfo = null;
+            string newRootPath = string.Empty;
+            List<String> folderNames = new List<string>();
+            
+            //For Art
+            newRootPath = string.Format(m_directoryCreationString, rootPath, "Art");
+
+            rootInfo = Directory.CreateDirectory(newRootPath);
+
+            if (rootInfo.Exists)
+            {
+                folderNames.Clear();
+                folderNames.Add("Animation");
+                folderNames.Add("Objects");
+                folderNames.Add("Materials");
+                folderNames.Add("Shaders");
+                folderNames.Add("Fonts");
+                
+                CreateFolders(newRootPath, folderNames);
+            }
+            
+            //For Scripts
+            newRootPath = string.Format(m_directoryCreationString, rootPath, "Scripts");
+
+            rootInfo = Directory.CreateDirectory(newRootPath);
+
+            if (rootInfo.Exists)
+            {
+                folderNames.Clear();
+                folderNames.Add("Editor");
+                folderNames.Add("Managers");
+                folderNames.Add("Shaders");
+                folderNames.Add("UI");
+                folderNames.Add("Misc");
+                
+                CreateFolders(newRootPath, folderNames);
+            }
+            
+            //For Audio
+            newRootPath = string.Format(m_directoryCreationString, rootPath, "Audio");
+
+            rootInfo = Directory.CreateDirectory(newRootPath);
+
+            if (rootInfo.Exists)
+            {
+                folderNames.Clear();
+                folderNames.Add("Sound Effects");
+                folderNames.Add("Background Music");
+                folderNames.Add("UI");
+
+                CreateFolders(newRootPath, folderNames);
+            }
+            
+            //For Prefabs
+            newRootPath = string.Format(m_directoryCreationString, rootPath, "Prefabs");
+
+            rootInfo = Directory.CreateDirectory(newRootPath);
+
+            if (rootInfo.Exists)
+            {
+                folderNames.Clear();
+                folderNames.Add("Characters");
+                folderNames.Add("Environment");
+                folderNames.Add("Props");
+                folderNames.Add("UI");
+                folderNames.Add("Misc");
+                
+                CreateFolders(newRootPath, folderNames);
+            }
+        }
+
+        private void CreateFolders(string path, List<string> folders)
+        {
+            if (folders == null || folders.Count == 0)
+            {
+                return;
+            }
+
+            foreach (string folder in folders)
+            {
+                Directory.CreateDirectory(string.Format(m_directoryCreationString, path, folder));
+            }
+        }
+
 
         private void FocusOnTextField()
         {
