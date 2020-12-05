@@ -22,7 +22,6 @@ namespace GursaanjTools
         private const string m_genericGameName = "Game";
         private const string m_guiTextFieldName = "GameNameTextField";
         private const string m_sceneNameExtension = ".unity";
-        private const string m_sceneDirectoryName = "Scenes";
 
         private const string m_directoryCreationString = "{0}/{1}";
         private const string m_sceneCreationString = "{0}_{1}";
@@ -44,7 +43,8 @@ namespace GursaanjTools
 
 
         #region Unity Methods
-
+        
+        [MenuItem("GursaanjTools/Projects/Project Setup Tool")]
         public static void InitWindow()
         {
             m_window = GetWindow<ProjectSetupWindow>(m_windowName);
