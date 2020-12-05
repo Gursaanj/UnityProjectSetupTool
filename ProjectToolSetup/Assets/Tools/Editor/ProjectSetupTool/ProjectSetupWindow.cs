@@ -17,6 +17,7 @@ namespace GursaanjTools
         private const string m_gameNameLabel = "Game Name: ";
         private const string m_buttonLabel = "Create Project Structure";
         private const string m_genericGameName = "Game";
+        private const string m_guiTextFieldName = "GameNameTextField";
         
         //Display Dialogue Strings
         private const string m_confirmationString = "Sounds good!";
@@ -27,7 +28,8 @@ namespace GursaanjTools
         private readonly string m_genericDirectoryMessage = String.Format("Are you sure you would like to create a directory for {0}", m_genericGameName);
 
         private const int m_buttonHeight = 35;
-        
+
+        private bool m_shouldFocusOnFirstTextElement = true;
         private string m_gameName = m_genericGameName;
         
         #endregion
@@ -40,22 +42,15 @@ namespace GursaanjTools
             m_window = GetWindow<ProjectSetupWindow>(m_windowName);
             m_window.minSize = m_minSize;
             m_window.maxSize = m_maxSize;
+            m_window.Focus();
             m_window.Show();
-        }
-
-        private void OnFocus()
-        {
-            if (GUI.GetNameOfFocusedControl() == "GameNameTextField")
-            {
-                EditorGUI.FocusTextInControl("GameNameTextField");
-            }
         }
 
         private void OnGUI()
         {
             using (new EditorGUILayout.HorizontalScope())
             {
-                GUI.SetNextControlName("GameNameTextField");
+                GUI.SetNextControlName(m_guiTextFieldName);
                 m_gameName = EditorGUILayout.TextField(m_gameNameLabel, m_gameName);
             }
             
@@ -68,6 +63,8 @@ namespace GursaanjTools
             {
                 CreateProjectFolders();
             }
+            
+            FocusOnTextField();
 
             if (m_window != null)
             {
@@ -84,6 +81,7 @@ namespace GursaanjTools
             if (string.IsNullOrEmpty(m_gameName))
             {
                 EditorUtility.DisplayDialog(m_errorTitle, m_noNameForDirectoryMessage, m_confirmationString);
+                m_shouldFocusOnFirstTextElement = true;
                 return;
             }
 
@@ -91,6 +89,7 @@ namespace GursaanjTools
             {
                 if (!EditorUtility.DisplayDialog(m_genricNameDisputeTitle, m_genericDirectoryMessage, m_confirmationString, m_cancelString))
                 {
+                    m_shouldFocusOnFirstTextElement = true;
                     return;
                 }
             }
@@ -101,6 +100,16 @@ namespace GursaanjTools
             AssetDatabase.Refresh();
 
             CloseWindow();
+        }
+
+        private void FocusOnTextField()
+        {
+            if (m_shouldFocusOnFirstTextElement && m_window != null)
+            {
+                m_window.Focus(); // Refocus onto window if focus is lost from using the Display Dialogue
+                EditorGUI.FocusTextInControl(m_guiTextFieldName);
+                m_shouldFocusOnFirstTextElement = false;
+            }
         }
 
         private void CloseWindow()
