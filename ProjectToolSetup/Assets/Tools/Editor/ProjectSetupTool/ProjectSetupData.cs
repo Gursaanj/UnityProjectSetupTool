@@ -52,6 +52,25 @@ namespace GursaanjTools
         {
             return m_sceneNames;
         }
+
+        public static string[] GetDirectoryNames(this string[] directoryPaths)
+        {
+            if (directoryPaths == null || directoryPaths.Length == 0)
+            {
+                return null;
+            }
+
+            string[] tempHolder = null;
+            string[] directoryNames = new string[directoryPaths.Length];
+
+            for (int i = 0, count = directoryPaths.Length; i < count; i++)
+            {
+                tempHolder = directoryPaths[i].Split('\\');
+                directoryNames[i] = tempHolder[tempHolder.Length - 1];
+            }
+
+            return directoryNames;
+        }
     }
 }
 

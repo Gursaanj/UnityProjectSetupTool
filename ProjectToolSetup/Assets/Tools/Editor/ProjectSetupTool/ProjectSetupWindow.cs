@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEditor.SceneManagement;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace GursaanjTools
 {
@@ -101,6 +102,8 @@ namespace GursaanjTools
                     return;
                 }
             }
+
+            m_gameName = IndexGameNameIfNeeded(m_gameName);
             
             //Create Main Directory
             string rootPath = string.Format(m_directoryCreationString, Application.dataPath, m_gameName);
@@ -115,8 +118,7 @@ namespace GursaanjTools
             AssetDatabase.Refresh();
             CloseWindow();
         }
-        
-        //Todo : Create static class for string
+
         private void CreateSubFolders(string rootPath)
         {
             DirectoryInfo rootInfo = null;
@@ -173,6 +175,26 @@ namespace GursaanjTools
                     }
                 }
             }
+        }
+        
+        // Adds a +1 to the gamename if multiple folders exist
+        private string IndexGameNameIfNeeded(string gameName)
+        {
+            string newGameName = gameName;
+            int sucessionIndex = 1;
+
+            string[] mainDirectories = Directory.GetDirectories(Application.dataPath).GetDirectoryNames();
+
+            if (mainDirectories != null)
+            {
+                while (mainDirectories.Contains(newGameName))
+                {
+                    newGameName = string.Format("{0}{1}", gameName, sucessionIndex);
+                    sucessionIndex++;
+                }
+            }
+
+            return newGameName;
         }
 
         private void CreateFolders(string path, List<string> folders)
